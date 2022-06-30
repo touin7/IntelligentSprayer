@@ -45,7 +45,7 @@ class SensorsRaspberry:
             distance = self.vl53.distance
             self.vl53.clear_interrupt()
         else:
-            distance = -1
+            distance = None
         
         return distance
 

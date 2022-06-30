@@ -12,11 +12,11 @@ import hwPWMOutput
 
 win_name = 'Camera Matching'
 
-cameraNumber = 1 #0-laptopCam, 1-webCam
-camera = cameraHandler.CameraHandler(cameraNumber,raspberry=True)
+#cameraNumber = 1 #0-laptopCam, 1-webCam
+#camera = cameraHandler.CameraHandler(cameraNumber,raspberry=True)
 
-laserDist = laserDistance.LaserDistance(camera.getFocalLengthX())
-laserDist.VERBOSE_IMAGE = False
+#laserDist = laserDistance.LaserDistance(camera.getFocalLengthX())
+#laserDist.VERBOSE_IMAGE = False
 
 sensors = sensorsRaspberry.SensorsRaspberry(ultrasound=True, tof=True)
 
@@ -34,18 +34,22 @@ activeSaving = False
 videoNumber = 0
 
 #INIT - first images
-frame = camera.newImage()
+#frame = camera.newImage()
 
 while True:       
     exTime = time.perf_counter()
     
     # sensor read
     #ultrasoundData = sensors.distanceUltrasound()
-    tofData = sensors.distanceToF()
+    newTofData = sensors.distanceToF()
+    if (newTofData != None):
+        tofData = newTofData
     
-    if (tofData > 40) and (tofData < 20):
-        plusLed.setBlink(True)
-        minusLed.setBlink(True)
+    
+
+    if (tofData > 40) or (tofData < 20):
+        plusLed.blink()
+        minusLed.blink()
     elif tofData >= 30: # distance is in between 30cm and 40cm
         minusLed.dim((tofData-30)*10)
         plusLed.dim(0)
@@ -53,15 +57,14 @@ while True:
         minusLed.dim(0)
         plusLed.dim((30-tofData)*10)
 
-    plusLed.updateLed()
-    minusLed.updateLed()
+    
     
     
     exTime = time.perf_counter() - exTime    
     
-    print("Execution time [ms]: %.2f Potential frame rate: %d"% (exTime*1000, 1/exTime))
-
-    if endButton.readButton() is True:
+    #print("Execution time [ms]: %.2f Potential frame rate: %d"% (exTime*1000, 1/exTime))
+    
+    if endButton.readButton() == 0:
         print("End button is pressed!!")
         break
 
