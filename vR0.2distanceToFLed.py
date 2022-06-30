@@ -6,6 +6,8 @@ import numpy as np
 import cameraHandler
 import laserDistance
 import sensorsRaspberry
+import hwButton
+import hwPWMOutput
 
 
 win_name = 'Camera Matching'
@@ -20,6 +22,11 @@ sensors = sensorsRaspberry.SensorsRaspberry(ultrasound=True, tof=True)
 
 ultrasoundData = 0
 tofData = 0
+
+endButton = hwButton.HWButton(21)
+
+plusLed = hwPWMOutput.HWPWMOut(19)
+minusLed = hwPWMOutput.HWPWMOut(26)
 
 # save video and data
 fourcc = cv.VideoWriter_fourcc('P','I','M','1')
@@ -36,22 +43,28 @@ while True:
     #ultrasoundData = sensors.distanceUltrasound()
     tofData = sensors.distanceToF()
     
-           
-    #if activeSaving:
-    #    out.write(frame)
-    #    outFile.write(str(time.perf_counter()) + ';' + str(exTime) + ';' + str(ultrasoundData) + ';' + str(tofData) + ';' + str(distZ))
-        
-        
-    #    outFile.write('\n')
+    if (tofData > 40) and (tofData < 20):
+        plusLed.setBlink(True)
+        minusLed.setBlink(True)
+    elif tofData >= 30: # distance is in between 30cm and 40cm
+        minusLed.dim((tofData-30)*10)
+        plusLed.dim(0)
+    elif tofData < 30: # distance is in between 20cm and 30cm
+        minusLed.dim(0)
+        plusLed.dim((30-tofData)*10)
 
-    exTime = time.perf_counter() - exTime    
-
-    #cv.putText(frame, "Execution time [ms]: %.2f Potential frame rate: %d"% (exTime*1000, 1/exTime), (20,20),cv.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255))        
+    plusLed.updateLed()
+    minusLed.updateLed()
     
-    #cv.imshow(win_name, frame)
+    
+    exTime = time.perf_counter() - exTime    
     
     print("Execution time [ms]: %.2f Potential frame rate: %d"% (exTime*1000, 1/exTime))
 
+    if endButton.readButton() is True:
+        print("End button is pressed!!")
+        break
 
 print("End of the program")
+plusLed.close()
 
