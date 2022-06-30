@@ -58,25 +58,47 @@ while True:
     #speed = featureSpeed.update(frame,distZ)
     markerData = distSpeedMarker.update(frame)
     
-    if markerData is not None:
-        markID, markPos, markSpeed, markRot = markerData
+    #if len(markerData) != 0:
+    #    print(markerData)
+    #markID, markPos, markSpeed, markRot = markerData
     
     exTime = time.perf_counter() - exTime  
     
     cv.putText(frame, "Execution time [ms]: %.2f Potential frame rate: %d"% (exTime*1000, 1/exTime), (20,20),cv.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255))    
     cv.putText(frame, "LASER   - Distance-z: %.3f" % (distZ), (20,50),cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0)) 
-    cv.putText(frame, "MARKER  - Distance-z: %.3f" % (markPos[2]), (20,80), cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))
-    cv.putText(frame, "MARKER  - Rotation X: %.3f - Y: %.3f - Z: %.3f" % (markRot[0]/math.pi*180,markRot[1]/math.pi*180,markRot[2]/math.pi*180), (20,110), cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))
-    #cv.putText(frame, "FEATURE - Speed-x: %.3f - y: %.3f" % (speed[0],speed[1]), (20,110),cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))   
+    
     #cv.putText(frame, "MARKER  - Speed-x: %.3f - y: %.3f" % (markSpeed[0],markSpeed[1]), (20,140),cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))
     if ser.activeSerialPort:
-        cv.putText(frame, "Ultrasound - Distance-z: " + str(ultrasoundData), (20,170),cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))
-        cv.putText(frame, "ToF Laser  - Distance-z: " + str(tofData), (20,200),cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))
+        cv.putText(frame, "Ultrasound - Distance-z: " + str(ultrasoundData), (20,80),cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))
+        cv.putText(frame, "ToF Laser  - Distance-z: " + str(tofData), (20,110),cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))
     
+    if len(markerData) != 0:
+        for markDat in markerData:
+            markID, markPos, markSpeed, markRot = markDat
+            cv.putText(frame, "MARKER %.0d - Distance-z: %.3f" % (markID, markPos[2]), (20,(140 + markID * 60)), cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))
+            #cv.putText(frame, "MARKER %.0d - Speed-x: %.3f - y: %.3f" % (markID, markSpeed[0],markSpeed[1]), (20,(170 + markID * 60)),cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0))
+            
     if activeSaving:
         out.write(frame)
-        outFile.write(str(time.perf_counter()) + ';' + str(exTime) + ';' + str(markPos[2]) + ';' + str(distZ) + ';'
-                      + str(ultrasoundData) + ';' + str(tofData) + ';' + str(markRot[0]/math.pi*180) + ';' + str(markRot[1]/math.pi*180) + ';' + str(markRot[2]/math.pi*180) + '\n')
+        outFile.write(str(time.perf_counter()) + ';' + str(exTime) + ';' + str(ultrasoundData) + ';' + str(tofData) + ';' + str(distZ))
+        
+        
+        for i in range(0,5):
+            outFile.write(';')
+            founded = False
+            for markDat in markerData:
+                markID, markPos, markSpeed, markRot = markDat
+                if i == markID:
+                    founded = True
+                    break
+            if founded:
+                outFile.write(str(markID) + ';' + str(markPos[2]))
+            else:
+                outFile.write(str(i) + ';' + "-1")
+        outFile.write('\n')
+            
+        
+        #read and write 5 positions of the markers
     
     cv.imshow(win_name, frame)
     
@@ -113,7 +135,7 @@ while True:
             outputFileDataName = "data/" + str(videoNumber) + 'output.txt'
             out = cv.VideoWriter(outputFileVideoName, fourcc, 20.0, (int(camera.frame_width),int(camera.frame_heigth)))
             outFile = open(outputFileDataName, 'w+')
-            outFile.write("time;ExecutionTime;posZ-marker;posZ-laser;Ultrasound;Tof;RotX;RotY;RotZ\n")
+            outFile.write("time;ExecutionTime;Ultrasound;Tof;posZ-laser;ID1;dist1;ID2;dist2;ID3;dist3;ID4;dist4;ID5;dist5\n")
             activeSaving = True
             videoNumber = videoNumber + 1
             print("New video is capturing: ", outputFileVideoName, " - New data file is created: ", outputFileDataName)

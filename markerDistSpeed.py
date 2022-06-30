@@ -34,7 +34,7 @@ class MarkerDistSpeed:
         rvec, tvec ,_ = aruco.estimatePoseSingleMarkers(corners, size_of_marker, self.newCameraMtx, self.dist)
     
         # I CAN SENT JUST POSITION OF ONE MARKER
-        output = None
+        output = []
     
         if ids is not None:
             for i in range(0, ids.size):
@@ -53,7 +53,7 @@ class MarkerDistSpeed:
                     cv.putText(image, "Rotation - X %.0f - Y %.0f deg" % ((rvec[0][0][0] / math.pi * 180), (rvec[0][0][2] / math.pi * 180)), (int(corners[i][0][0][0]),int(corners[i][0][0][1]) + 20), cv.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0))
                     cv.putText(image,"Speed-x: %.3f - y: %.3f - z: %.3f" % (speed[0],speed[1],speed[2]), (int(corners[i][0][0][0]),int(corners[i][0][0][1]) + 40),cv.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0))
                 
-                output = [ids[i][0],tvec[i][0],speed, rvec[i][0]]
+                output.append([ids[i][0],tvec[i][0],speed, rvec[i][0]])
 
             if self.VERBOSE_IMAGE: cv.imshow("Marker Distance and Speed Class Image", image)
 
