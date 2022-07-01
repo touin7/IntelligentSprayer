@@ -47,9 +47,10 @@ while True:
     
     
 
-    if (tofData > 40) or (tofData < 20):
-        plusLed.blink()
+    if tofData > 40:
         minusLed.blink()
+    elif tofData < 20:
+        plusLed.blink()
     elif tofData >= 30: # distance is in between 30cm and 40cm
         minusLed.dim((tofData-30)*10)
         plusLed.dim(0)
