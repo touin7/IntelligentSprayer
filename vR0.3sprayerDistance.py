@@ -1,4 +1,5 @@
 import time
+from tkinter import wantobjects
 import cv2 as cv
 import numpy as np
 
@@ -16,6 +17,8 @@ sensors = sensorsRaspberry.SensorsRaspberry(ultrasound=True, tof=True)
 ultrasoundData = 0
 tofData = 0
 
+wantedDistance = 39
+
 sprayButton = hwButton.HWButton(20)
 
 plusLed = hwPWMOutput.HWPWMOut(19)
@@ -25,16 +28,6 @@ syringe = syringeControl.SyringeControl()
 
 sprayingMode = 0
 
-# Move enable button definition
-buttonPin = 21
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(buttonPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-def buttonEventOn(channel):
-    syringe.moveEnabled = True
-    
-def buttonEventOff(channel):
-    syringe.moveEnabled = False
 
 def calibration():
     print("MODE: Calibration...")
@@ -54,9 +47,9 @@ def calibration():
     syringe.stepCurrPos = 0
     syringe.stepInitPos()
     
-if __name__ == '__main__':
-    GPIO.add_event_detect(buttonPin, GPIO.FALLING, callback = buttonEventOn, bouncetime=300)
-    GPIO.add_event_detect(buttonPin, GPIO.RISING, callback = buttonEventOff, bouncetime=300)
+if __name__ == '__main__': 
+    #FUTURE UPDATE - inconsistent torque, sleep in between steps of stepper motor
+    # - use different thread or something
     calibration()
     while True:       
         exTime = time.perf_counter()
@@ -67,20 +60,21 @@ if __name__ == '__main__':
             tofData = newTofData
         
         
-        if tofData > 40:
+        if tofData > (wantedDistance+10):
             minusLed.blink()
-        elif tofData < 20:
+        elif tofData < (wantedDistance-10):
             plusLed.blink()
-        elif tofData >= 30: # distance is in between 30cm and 40cm
-            minusLed.dim((tofData-30)*10)
+        elif tofData >= wantedDistance: # distance is in between 30cm and 40cm
+            minusLed.dim((tofData-wantedDistance)*10)
             plusLed.dim(0)
-        elif tofData < 30: # distance is in between 20cm and 30cm
+        elif tofData <= wantedDistance: # distance is in between 20cm and 30cm
             minusLed.dim(0)
-            plusLed.dim((30-tofData)*10)
+            plusLed.dim((wantedDistance-tofData)*10)
 
         
         exTime = time.perf_counter() - exTime    
         
+        #print(syringe.moveEnabled)
         #print("Execution time [ms]: %.2f Potential frame rate: %d"% (exTime*1000, 1/exTime))
         
         if sprayingMode == 1: #going to the initial position
@@ -88,14 +82,21 @@ if __name__ == '__main__':
                 print("Initial position reached")
                 syringe.servoMove(1)
                 print("Valve is closed - ready for spraying")
-                time.sleep(2)
                 syringe.sprayingStepper()
                 sprayingMode = 2
         elif sprayingMode == 2:
             if syringe.inMove == False:
                 print("Spraying ended")
+                syringe.stepperNoMove()
+                print("REMOVE EMPTY SYRINGE AND PRESS SPRAY BUTTON!!")
                 time.sleep(1)
                 syringe.servoMove(0)
+                sprayingMode = 3
+        elif sprayingMode == 4:
+            if syringe.inMove == False:
+                syringe.stepperNoMove()
+                print("Sprayer is in initial position")
+                print("...Insert full syringe!!!")
                 sprayingMode = 0
                 
             
@@ -107,6 +108,10 @@ if __name__ == '__main__':
             if sprayingMode == 0:
                 syringe.stepInitPos()
                 sprayingMode = 1
+            elif sprayingMode == 3:
+                print("Syringe was removed")
+                syringe.stepInitPos()
+                sprayingMode = 4
             else:
                 print("Spraying has already started!!")
             
