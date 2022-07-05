@@ -1,0 +1,25 @@
+Config file - not used yet
+it will define used GPIO ports 
+
+GPIO port used in vR0.3sprayerDistance.py
+
+-- syringe
+MoveEnable button: pin#40-GPIO21
+Calibrationbutton: pin#16-GPIO23
+Servo - PWM: pin#32-GPIO12
+Stepper motor:
+self.out1 = 17 #GPIO = 11, Board = 17
+self.out2 = 27 #GPIO = 13, Board = 27
+self.out3 = 18 #GPIO = 12, Board = 18
+self.out4 = 22 #GPIO = 15, Board = 22
+
+-- controll buttons
+Spraybutton: pin#38-GPIO20
+
+-- leds - indicators
+Plus led: pin#35-GPIO19
+Minusled: pin#37-GPIO26
+
+-- sensors
+Only Tof sensor is used and that one uses I2C communitacion
+I2C: pin#3-GPIO2 = SDA, pin#5-GPIO3 = SCL
