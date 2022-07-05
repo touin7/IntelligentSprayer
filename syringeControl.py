@@ -53,8 +53,8 @@ class SyringeControl:
 
         #Variables - Stepper
         self.stepCurrPos = 0
-        self.stepStartPos = 5000
-        self.stepEndPos = 22500
+        self.stepStartPos = 8000
+        self.stepEndPos = 23000
 
         self.stepMoveSpeed = 500 # ... steps per one second
         self.stepSpraySpeed = 500
