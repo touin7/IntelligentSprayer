@@ -75,13 +75,14 @@ while True:
     accel_z = accel_z*msTogConst
     
     # Print values.
-    
-    printValues()
+
     
     if activeSaving:
         dataStringFx = str("%.9f" %gyro_x + ";%.9f" %gyro_y + ";%.9f" %gyro_z + ";%.9f" %accel_x + ";%.9f" %accel_y + ";%.9f" %accel_z + ";%.9f" %mag_x + ";%.9f" %mag_y + ";%.9f" %mag_z)
         timeMeasurement = time.time() - startTime
         outFile.write(str(time.perf_counter()) + ',' + dataStringFx + '\n')
+    else:
+        printValues()
 
 
 
