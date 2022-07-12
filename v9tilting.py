@@ -19,9 +19,9 @@ cameraNumber = 1 #-1-oneImage, 0-laptopCam, 1-webCam
 imagePath = homePath + imageName
 camera = cameraHandler.CameraHandler(cameraNumber,imagePath)
 
-#featureSpeed = fs.FeatureSpeedDetection(camera.getFocalLengthX())
-#featureSpeed.VERBOSE = False
-#featureSpeed.VERBOSE_IMAGE = False
+featureSpeed = fs.FeatureSpeedDetection(camera.getFocalLengthX())
+featureSpeed.VERBOSE = False
+featureSpeed.VERBOSE_IMAGE = False
 
 laserDist = laserDistance.LaserDistance(camera.getFocalLengthX())
 laserDist.VERBOSE_IMAGE = False
@@ -50,7 +50,7 @@ videoNumber = 0
 #INIT - first images
 frame = camera.newImage()
     
-#featureSpeed.updateFirstImage(frame)
+featureSpeed.updateFirstImage(frame)
 
 while True:       
     frame = camera.newImage()
@@ -64,7 +64,7 @@ while True:
     
     distZ = laserDist.update(frame)
     lasImage = laserTilt.update(frame)
-    #speed = featureSpeed.update(frame,distZ)
+    speed = featureSpeed.update(frame,distZ)
     markerData = distSpeedMarker.update(frame)
     
     #if len(markerData) != 0:
@@ -133,11 +133,11 @@ while True:
         if laserTilt.VERBOSE_IMAGE is False:
             cv.destroyAllWindows()
             
-    #elif key == ord('f'): 
-    #    featureSpeed.VERBOSE_IMAGE = not featureSpeed.VERBOSE_IMAGE
-    #    print("MAIN - Feature speed window was changed: ", featureSpeed.VERBOSE_IMAGE)
-    #    if featureSpeed.VERBOSE_IMAGE is False:
-    #        cv.destroyAllWindows()
+    elif key == ord('f'): 
+        featureSpeed.VERBOSE_IMAGE = not featureSpeed.VERBOSE_IMAGE
+        print("MAIN - Feature speed window was changed: ", featureSpeed.VERBOSE_IMAGE)
+        if featureSpeed.VERBOSE_IMAGE is False:
+            cv.destroyAllWindows()
             
     elif key == ord('v'):
         if activeSaving:

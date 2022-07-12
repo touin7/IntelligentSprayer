@@ -1,6 +1,4 @@
-from pickle import FALSE
 import time
-from turtle import speed
 import cv2 as cv
 import numpy as np
 import markerClass
@@ -30,6 +28,7 @@ class FeatureSpeedDetection():
         self.img1Borders = np.float32([ [[0,0]],[[0,0]],[[0,0]],[[0,0]],[[0,0]] ])
         self.oneFrameTime = 0
         self.speed = None
+        self.enoughMatches = False
         
         #openCV objects
         self.detector = cv.ORB_create(1000)
@@ -59,6 +58,19 @@ class FeatureSpeedDetection():
         kp1, desc1 = self.detector.detectAndCompute(gray1, None) 
         kp2, desc2 = self.detector.detectAndCompute(gray2, None)
            
+        if (desc1 is None) or (desc2 is None):
+            if self.VERBOSE: print('FEATURE SPEED - No descriptors')
+            self.updateFirstImage(newFrame)
+            self.enoughMatches = False
+            return self.speed
+        
+        if (len(desc1) < self.MIN_MATCH) or (len(desc2) < self.MIN_MATCH):
+            if self.VERBOSE: print('FEATURE SPEED - Not enough descriptors')
+            self.updateFirstImage(newFrame)
+            self.enoughMatches = False
+            return self.speed
+         
+        self.enoughMatches = True   
         matches = self.matcher.knnMatch(desc1, desc2, 2)
         good_matches = [m[0] for m in matches 
                         if len(m) == 2 and m[0].distance < m[1].distance * self.ratio]
@@ -74,7 +86,7 @@ class FeatureSpeedDetection():
             mtrx, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
             accuracy=float(mask.sum()) / mask.size
             
-            if self.VERBOSE: print("FEATURE SPEED - accuracy: %d/%d(%.2f%%)"% (mask.sum(), mask.size, accuracy))
+            if self.VERBOSE: print("FEATURE SPEED - accuracy: %d/%d(%.0f%%)"% (mask.sum(), mask.size, accuracy*100))
             
             matchesMask = mask.ravel().tolist()
             
