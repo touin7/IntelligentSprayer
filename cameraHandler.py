@@ -51,8 +51,10 @@ class CameraHandler:
         
         
         if self.cameraNumber == 1:
-            self.cap.set(cv.CAP_PROP_FRAME_WIDTH,1280)
-            self.cap.set(cv.CAP_PROP_FRAME_HEIGHT,720)
+            #self.cap.set(cv.CAP_PROP_FRAME_WIDTH,1280)
+            #self.cap.set(cv.CAP_PROP_FRAME_HEIGHT,720)
+            self.cap.set(cv.CAP_PROP_FRAME_WIDTH,640)
+            self.cap.set(cv.CAP_PROP_FRAME_HEIGHT,480)
         else:
             self.cap.set(cv.CAP_PROP_FRAME_WIDTH,640)
             self.cap.set(cv.CAP_PROP_FRAME_HEIGHT,480)

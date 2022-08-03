@@ -82,7 +82,7 @@ def calibration(syringe):
             break
             
         if syringe.inMove is False:
-            syringe.stepperMove(-4,syringe.stepCallibSpeed)
+            syringe.stepperMove(-8,syringe.stepCallibSpeed)
 
         syringe.updateMove()
 
@@ -93,6 +93,10 @@ def calibration(syringe):
     
     
 def sendMessageToProcess(connection, message):
+    while connSyringeRec.poll():
+        connSyringeRec.recv()
+        print("In connection buffer: ", inMoveSyringe)
+
     connection.send(message)
         
     while not connection.poll():
@@ -138,6 +142,7 @@ if __name__ == '__main__':
             minusLed.dim(0)
             plusLed.dim((wantedDistance-tofData)*10)
 
+        outFile.write(str(time.time()) + ';' + str(tofData) + '\n')
         
         exTime = time.perf_counter() - exTime    
         
@@ -146,7 +151,7 @@ if __name__ == '__main__':
         
         if connSyringeRec.poll():
             inMoveSyringe = connSyringeRec.recv()
-            print("--Main process received: ", inMoveSyringe)
+            #print("--Main process received: ", inMoveSyringe)
         
         
         if sprayingMode == 1: #going to the initial position
@@ -160,10 +165,14 @@ if __name__ == '__main__':
             if inMoveSyringe == False:
                 print("Spraying ended")
                 inMoveSyringe = sendMessageToProcess(connSyringeRec, 'm0')#syringe.stepperNoMove() # m0
-                print("REMOVE EMPTY SYRINGE AND PRESS SPRAY BUTTON!!")
                 time.sleep(1)
                 inMoveSyringe = sendMessageToProcess(connSyringeRec, 's0')#syringe.servoMove(0) # s0
                 sprayingMode = 3
+        elif sprayingMode == 3:
+                print("Syringe was removed ;)")
+                inMoveSyringe = sendMessageToProcess(connSyringeRec, 'm2')#syringe.stepInitPos() # m2
+                sprayingMode = 4
+                time.sleep(1)
         elif sprayingMode == 4:
             if inMoveSyringe == False:
                 inMoveSyringe = sendMessageToProcess(connSyringeRec, 'm0')#syringe.stepperNoMove() # m0
@@ -174,14 +183,10 @@ if __name__ == '__main__':
         
         if sprayButton.readButton() == 0:
 
-            print("Spray button is pressed!!")
+            #print("Spray button is pressed!!")
             if sprayingMode == 0:
                 inMoveSyringe = sendMessageToProcess(connSyringeRec, 'm2')#syringe.stepInitPos() # m2
                 sprayingMode = 1
-            elif sprayingMode == 3:
-                print("Syringe was removed")
-                inMoveSyringe = sendMessageToProcess(connSyringeRec, 'm2')#syringe.stepInitPos() # m2
-                sprayingMode = 4
             elif sprayingMode == 4:
                 print("Do you really want to end program????")
                 actualTime = time.time()

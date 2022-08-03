@@ -14,7 +14,7 @@ class OneMarker:
             self.positions = np.delete(self.positions,0,0) #delete the first item
             
     def speedCalculation(self):
-        if self.positions.shape[0] < 5:
+        if self.positions.shape[0] < (self.numSavedSamples - 1):
             self.speed = np.array([np.NaN,np.NaN,np.NaN])
             return # not enough possitions for calculation
         

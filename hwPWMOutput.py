@@ -16,6 +16,12 @@ class HWPWMOut:
         
     def dim(self, percent):
         self.led.ChangeDutyCycle(percent)
+
+    def ledOn(self):
+        self.led.ChangeDutyCycle(100)
+
+    def ledOff(self):
+        self.led.ChangeDutyCycle(0)
         
     def blink(self, timeCycle=0.1):
         self.blinkPer = timeCycle

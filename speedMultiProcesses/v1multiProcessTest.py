@@ -3,10 +3,8 @@ import sys;
 import multiprocessing
 import time
 
-from matplotlib.pyplot import connect
-
-#sys.path.insert(0, '/home/raspberry/Desktop/github/IntelligentSprayer')
-sys.path.insert(0,'D:\Erasmus - Master\Work\MEDICATION\GitHub\IntelligentSprayer')
+sys.path.insert(0, '/home/raspberry/Desktop/github/IntelligentSprayer')
+#sys.path.insert(0,'D:\Erasmus - Master\Work\MEDICATION\GitHub\IntelligentSprayer')
 
 import cameraHandler
 import featureSpeedDetection as fs
@@ -15,7 +13,7 @@ def cameraProcess(connection,cameraNumber=1):
     print('Camera - Sender Process: Running', flush=True)
     
     #win_name = 'Camera Matching'
-    camera = cameraHandler.CameraHandler(cameraNumber)
+    camera = cameraHandler.CameraHandler(cameraNumber,raspberry=True)
     featureSpeed = fs.FeatureSpeedDetection(camera.getFocalLengthX())
     featureSpeed.VERBOSE = False
     featureSpeed.VERBOSE_IMAGE = False
@@ -29,7 +27,7 @@ def cameraProcess(connection,cameraNumber=1):
         frame = camera.newImage()
         speed = featureSpeed.update(frame,30)
         connection.send(speed)
-        cnt =+ 1
+        cnt += 1
         
         #if connection.poll():
         #    item = connCameraRec.recv()

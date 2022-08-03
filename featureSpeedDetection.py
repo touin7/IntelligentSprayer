@@ -15,7 +15,7 @@ import markerClass
 # Homografy: https://docs.opencv.org/4.x/d1/de0/tutorial_py_feature_homography.html
 
 class FeatureSpeedDetection():
-    def __init__(self, focalLengthX):
+    def __init__(self, focalLengthX, savedSamples=10):
         #constants
         self.MIN_MATCH = 10
         self.VERBOSE = False
@@ -40,9 +40,9 @@ class FeatureSpeedDetection():
         search_params=dict(checks=32) #processing time highly depends on this number
         self.matcher = cv.FlannBasedMatcher(index_params, search_params)
         
-        #objects
+        #Markers
         self.markers = markerClass.Markers()
-        
+        self.savedSamples = savedSamples
     
     def update(self,newFrame, zDistance):
         if self.img1 is None:
@@ -116,7 +116,7 @@ class FeatureSpeedDetection():
             
             position = np.array([[self.oneFrameTime,xDistanceW,yDistanceW,0]])
             
-            self.markers.writePos(-1,position)
+            self.markers.writePos(-1,position,self.savedSamples)
             
             self.oneFrameTime = time.perf_counter()
             

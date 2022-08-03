@@ -4,6 +4,7 @@ from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
 
 import hwButton
+import hwPWMOutput
 
 
 class SyringeControl:
@@ -16,7 +17,7 @@ class SyringeControl:
         self.moveSpeed = 0
         self.timeOfLastMove = time.time()
 
-        self.moveEnButton = hwButton.HWButton(21)
+        
         
         ###################################
         #Pins
@@ -40,8 +41,11 @@ class SyringeControl:
         GPIO.setup(self.out3,GPIO.OUT)
         GPIO.setup(self.out4,GPIO.OUT)
         
-        #Setup - Button
+        #Setup - Callibration button
         GPIO.setup(self.buttonPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        # move Enable button
+        self.moveEnButton = hwButton.HWButton(21)
+        self.moveEnLed = hwPWMOutput.HWPWMOut(13) 
 
         ##################################
         #Variables - Servo
@@ -53,12 +57,12 @@ class SyringeControl:
 
         #Variables - Stepper
         self.stepCurrPos = 0
-        self.stepStartPos = 8000
-        self.stepEndPos = 23000
+        self.stepStartPos = 1760
+        self.stepEndPos = 4800
 
-        self.stepMoveSpeed = 500 # ... steps per one second
-        self.stepSpraySpeed = 500
-        self.stepCallibSpeed = 500
+        self.stepMoveSpeed = 1000 # ... steps per one second
+        self.stepSpraySpeed = 100
+        self.stepCallibSpeed = 200
         
     def waitForEnable(self):
         startTime = time.time()
@@ -92,6 +96,11 @@ class SyringeControl:
         
         
     def updateMove(self):
+        if self.inMove:
+            self.moveEnLed.ledOn()
+        else:
+            self.moveEnLed.ledOff()
+
         self.moveEnabled = not self.moveEnButton.readButton()
         if self.inMove and ((time.time() - self.timeOfLastMove) > 1):
             print("In move mode - press Enable move button for move")
@@ -100,23 +109,43 @@ class SyringeControl:
         if self.inMove and self.moveEnabled and ((time.time() - self.timeOfLastMove) >= self.moveSpeed):
             if self.backMove is False:
                 i = self.remainSteps
-                if i%4==0:
+                if i%8==0:
                     GPIO.output( self.out4, GPIO.HIGH )
                     GPIO.output( self.out3, GPIO.LOW )
                     GPIO.output( self.out2, GPIO.LOW )
                     GPIO.output( self.out1, GPIO.LOW )
-                elif i%4==1:
+                elif i%8==1:
+                    GPIO.output( self.out4, GPIO.HIGH )
+                    GPIO.output( self.out3, GPIO.LOW )
+                    GPIO.output( self.out2, GPIO.LOW )
+                    GPIO.output( self.out1, GPIO.HIGH )
+                elif i%8==2:
                     GPIO.output( self.out4, GPIO.LOW )
                     GPIO.output( self.out3, GPIO.LOW )
                     GPIO.output( self.out2, GPIO.LOW )
                     GPIO.output( self.out1, GPIO.HIGH )
-                elif i%4==2:
+                elif i%8==3:
+                    GPIO.output( self.out4, GPIO.LOW )
+                    GPIO.output( self.out3, GPIO.LOW )
+                    GPIO.output( self.out2, GPIO.HIGH )
+                    GPIO.output( self.out1, GPIO.HIGH )
+                elif i%8==4:
                     GPIO.output( self.out4, GPIO.LOW )
                     GPIO.output( self.out3, GPIO.LOW )
                     GPIO.output( self.out2, GPIO.HIGH )
                     GPIO.output( self.out1, GPIO.LOW )
-                elif i%4==3:
+                elif i%8==5:
                     GPIO.output( self.out4, GPIO.LOW )
+                    GPIO.output( self.out3, GPIO.HIGH )
+                    GPIO.output( self.out2, GPIO.HIGH )
+                    GPIO.output( self.out1, GPIO.LOW )
+                elif i%8==6:
+                    GPIO.output( self.out4, GPIO.LOW )
+                    GPIO.output( self.out3, GPIO.HIGH )
+                    GPIO.output( self.out2, GPIO.LOW )
+                    GPIO.output( self.out1, GPIO.LOW )
+                elif i%8==7:
+                    GPIO.output( self.out4, GPIO.HIGH )
                     GPIO.output( self.out3, GPIO.HIGH )
                     GPIO.output( self.out2, GPIO.LOW )
                     GPIO.output( self.out1, GPIO.LOW )
@@ -125,23 +154,43 @@ class SyringeControl:
                 self.remainSteps = self.remainSteps - 1
             else:
                 i = self.remainSteps
-                if i%4==0:
+                if i%8==0:
                     GPIO.output( self.out4, GPIO.HIGH )
                     GPIO.output( self.out3, GPIO.LOW )
                     GPIO.output( self.out2, GPIO.LOW )
                     GPIO.output( self.out1, GPIO.LOW )
-                elif i%4==1:
+                elif i%8==1:
+                    GPIO.output( self.out4, GPIO.HIGH )
+                    GPIO.output( self.out3, GPIO.HIGH )
+                    GPIO.output( self.out2, GPIO.LOW )
+                    GPIO.output( self.out1, GPIO.LOW )
+                elif i%8==2:
                     GPIO.output( self.out4, GPIO.LOW )
                     GPIO.output( self.out3, GPIO.HIGH )
                     GPIO.output( self.out2, GPIO.LOW )
                     GPIO.output( self.out1, GPIO.LOW )
-                elif i%4==2:
+                elif i%8==3:
+                    GPIO.output( self.out4, GPIO.LOW )
+                    GPIO.output( self.out3, GPIO.HIGH )
+                    GPIO.output( self.out2, GPIO.HIGH )
+                    GPIO.output( self.out1, GPIO.LOW )
+                elif i%8==4:
                     GPIO.output( self.out4, GPIO.LOW )
                     GPIO.output( self.out3, GPIO.LOW )
                     GPIO.output( self.out2, GPIO.HIGH )
                     GPIO.output( self.out1, GPIO.LOW )
-                elif i%4==3:
+                elif i%8==5:
                     GPIO.output( self.out4, GPIO.LOW )
+                    GPIO.output( self.out3, GPIO.LOW )
+                    GPIO.output( self.out2, GPIO.HIGH )
+                    GPIO.output( self.out1, GPIO.HIGH )
+                elif i%8==6:
+                    GPIO.output( self.out4, GPIO.LOW )
+                    GPIO.output( self.out3, GPIO.LOW )
+                    GPIO.output( self.out2, GPIO.LOW )
+                    GPIO.output( self.out1, GPIO.HIGH )
+                elif i%8==7:
+                    GPIO.output( self.out4, GPIO.HIGH )
                     GPIO.output( self.out3, GPIO.LOW )
                     GPIO.output( self.out2, GPIO.LOW )
                     GPIO.output( self.out1, GPIO.HIGH )
@@ -162,7 +211,7 @@ class SyringeControl:
         print("Going to the initial position...")
         self.printCurrentPos()
         steps = self.stepStartPos - self.stepCurrPos
-        steps = steps + steps%4
+        steps = steps + steps%8
         self.stepperMove(steps,self.stepMoveSpeed)
 
     def sprayingStepper(self):

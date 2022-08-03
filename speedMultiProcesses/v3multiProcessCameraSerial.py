@@ -2,10 +2,9 @@ import sys;
 import multiprocessing
 import time
 
-from matplotlib.pyplot import connect
 
-#sys.path.insert(0, '/home/raspberry/Desktop/github/IntelligentSprayer')
-sys.path.insert(0,'D:\Erasmus - Master\Work\MEDICATION\GitHub\IntelligentSprayer')
+sys.path.insert(0, '/home/raspberry/Desktop/github/IntelligentSprayer')
+#sys.path.insert(0,'D:\Erasmus - Master\Work\MEDICATION\GitHub\IntelligentSprayer')
 
 import cameraHandler
 import featureSpeedDetection as fs
@@ -14,8 +13,8 @@ import serialESP8266
 def cameraProcess(connection,cameraNumber=1,verb=False,verbIm=False):
     print('--Camera - Sender Process: Running', flush=True)
     
-    camera = cameraHandler.CameraHandler(cameraNumber)
-    featureSpeed = fs.FeatureSpeedDetection(camera.getFocalLengthX())
+    camera = cameraHandler.CameraHandler(cameraNumber,raspberry=True)
+    featureSpeed = fs.FeatureSpeedDetection(camera.getFocalLengthX(),savedSamples=5)
     featureSpeed.VERBOSE = verb
     featureSpeed.VERBOSE_IMAGE = verbIm
     
@@ -42,7 +41,7 @@ def serialProcess(connection):
     
     ser = serialESP8266.SerialESP8266(rawOutput=True,verbose=False)
     rawData = 0
-    ser.openSerial()
+    ser.openSerial(com='/dev/ttyUSB0')
     
     while True:
         
@@ -112,10 +111,10 @@ if __name__ == '__main__':
                 if len(velSerY) == 2:
                     velSerY = velSerY[1].split('\\')
                     velSerY = float(velSerY[0])
-                print("  --> main serial: ", velSerX, " - ", velSerY)
+                #print("  --> main serial: ", velSerX, " - ", velSerY)
         
         if (time.time() - timeStamp) >= 1:
-            print("I have done ", cnt, " cycles.")
+            #print("I have done ", cnt, " cycles.")
             cnt = 0
             timeStamp = time.time()
             
@@ -123,6 +122,7 @@ if __name__ == '__main__':
             print("I received 100 messages --> send terminate command")
             connCameraRec.send(None)
             connSerialRec.send(None)
+            cntMes = 0
     
     camera.join()   
     serial.join()
