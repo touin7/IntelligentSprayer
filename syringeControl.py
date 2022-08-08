@@ -24,10 +24,10 @@ class SyringeControl:
         self.buttonPin = 23 # GPIO = 23, Board = 16
         servoPin = 12 # GPIO = 12, Board = 32 
         
-        self.out1 = 17 #GPIO = 11, Board = 17
-        self.out2 = 27 #GPIO = 13, Board = 27
-        self.out3 = 18 #GPIO = 12, Board = 18
-        self.out4 = 22 #GPIO = 15, Board = 22
+        self.out1 = 17 #Board = 11, GPIO = 17
+        self.out2 = 27 #Board = 13, GPIO = 27
+        self.out3 = 18 #Board = 12, GPIO = 18
+        self.out4 = 22 #Board = 15, GPIO = 22
         
         ###################################
         #Setup - Servo
